@@ -1,0 +1,11 @@
+{% extends "template_base.html" %}
+{% block title %}Turbofan RUL Estimator{% endblock %}
+{% block heading_title %}Turbofan RUL Estimator{% endblock %}
+{% block main_content %}
+    <p>This application allows you to import operating data from a turbofan engine to obtain an estimate of remaining useful life.</p>
+    <label for="file_upload">Data File (CSV format):</label>
+    <input type="file" id="file_upload" name="file_upload"><br>
+    <label for="rul_estimate">Estimated RUL:</label>
+    <input type="text" id="rul_estimate" value="{{rul_est}} hours" readonly>
+{% endblock %}
+
