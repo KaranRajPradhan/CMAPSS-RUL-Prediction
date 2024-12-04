@@ -10,7 +10,7 @@ def index():
         rul_est = "" #leave results box empty
         return render_template('index.html', rul_est=rul_est)
     elif request.method == "POST":
-        file_contents = request.files["file_upload"].read().decode("utf-8") # ile_contents contains the string read from the file. This can be fed into a pandas dataframe
+        file_contents = request.files["file_upload"].read().decode("utf-8") # file_contents contains the string read from the file. This can be fed into a pandas dataframe
         if len(file_contents) == 0:
             rul_est = "Please upload a data file" # Checks for a non-empty file upload. Does not check for correct csv formatting
         else:
