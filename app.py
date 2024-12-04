@@ -1,5 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, request, flash
 from markupsafe import escape
+from models import linear_regression
+
 
 app = Flask(__name__)
 app.secret_key = "SECRET KEY"
@@ -18,11 +20,8 @@ def index():
             rul_est_2 = ""
             rul_est_3 = ""
         else:
-            print(request.files["file_upload"])
-            print(file_contents)
-            print(len(file_contents))
-            #TODO: Call the ML model here and update rul_est with the value
-            rul_est_lin = str(file_contents[0]) + " Hours"
-            rul_est_2 = str(file_contents[2]) + " Hours"
-            rul_est_3 = str(file_contents[4]) + " Hours"
+            request.files["file_upload"].seek(0)
+            rul_est_lin = str(linear_regression.generate_dataframe(request.files["file_upload"]))+ " Hours"
+            rul_est_2 = str(42) + " Hours"
+            rul_est_3 = str(42) + " Hours"
         return render_template('index.html', rul_est_lin=rul_est_lin,rul_est_2=rul_est_2,rul_est_3=rul_est_3)

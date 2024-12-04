@@ -11,3 +11,8 @@ from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from time import time
+
+def generate_dataframe(csv_file):
+    df = pd.read_csv(csv_file)
+    print(df.head())
+    return(3)
