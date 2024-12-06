@@ -9,11 +9,7 @@ import statsmodels.api as sm
 from time import time
 from pickle import dump, load
 
-def generate_model():
-    train_file = 'data/train_FD001.txt'
-    test_file = 'data/test_FD001.txt'
-    rul_file = 'data/RUL_FD001.txt'
-    
+def prepare_csv(filename):    
     column_names = [
     "EngineID", "Cycle", "Op1", "Op2", "Op3",
     "Sensor1", "Sensor2", "Sensor3", "Sensor4", "Sensor5",
@@ -24,13 +20,15 @@ def generate_model():
     ]
 
     # Load the training data
-    train_df1 = pd.read_csv("data/train_FD001.txt", sep='\s+', header=None, names=column_names)
-    train_df2 = pd.read_csv("data/train_FD002.txt", sep='\s+', header=None, names=column_names)
-    train_df3 = pd.read_csv("data/train_FD003.txt", sep='\s+', header=None, names=column_names)
-    train_df4 = pd.read_csv("data/train_FD004.txt", sep='\s+', header=None, names=column_names)
+    train_df1 = pd.read_csv("data/"+filename, sep='\s+', header=None, names=column_names)
     
     failure_data = train_df1.loc[train_df1.groupby('EngineID')['Cycle'].idxmax()]
     train_df1["CyclesToFailure"] = train_df1.apply(lambda row: failure_data["Cycle"].loc[failure_data["EngineID"] == row.EngineID].values[0]-row.Cycle, axis=1)
+    
+    train_df1.to_csv("data/"+filename, index=False)
+    
+def generate_model(training_data):
+    train_df1 = pd.read_csv("data/"+training_data)
     
     Y = train_df1["CyclesToFailure"]
     X = train_df1.drop("CyclesToFailure", axis=1)
@@ -47,4 +45,7 @@ def generate_dataframe(csv_file):
     return(3)
 
 def prediction_test():
-    model_save = 
+    model_save = open("model_lin_fit.pkl", "rb")
+    model_lin_fit = load(model_save)
+    print(model_lin_fit.summary())
+    
