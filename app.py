@@ -20,8 +20,17 @@ def index():
             rul_est_2 = ""
             rul_est_3 = ""
         else:
-            request.files["file_upload"].seek(0)
-            rul_est_lin = str(linear_regression.generate_dataframe(request.files["file_upload"]))+ " Hours"
+            data_file = request.files["file_upload"]
+            #calculate estimates from different models
+            data_file.seek(0) #linear
+            rul_est_lin_01 = str(linear_regression.get_single_prediction(data_file,"model_lin_fit_01.pkl"))
+            data_file.seek(0)
+            rul_est_lin_02 = str(linear_regression.get_single_prediction(data_file,"model_lin_fit_02.pkl"))
+            data_file.seek(0)
+            rul_est_lin_03 = str(linear_regression.get_single_prediction(data_file,"model_lin_fit_03.pkl"))
+            data_file.seek(0)
+            rul_est_lin_04 = str(linear_regression.get_single_prediction(data_file,"model_lin_fit_04.pkl"))
+            rul_est_lin = rul_est_lin_01 + ", " + rul_est_lin_02 + ", " + rul_est_lin_03 + ", " + rul_est_lin_04 + " Cycles"
             rul_est_2 = str(42) + " Hours"
             rul_est_3 = str(42) + " Hours"
         return render_template('index.html', rul_est_lin=rul_est_lin,rul_est_2=rul_est_2,rul_est_3=rul_est_3)
