@@ -26,6 +26,7 @@ def prepare_csv(filename):
     
 def generate_model(training_data, model_name):
     train_df1 = pd.read_csv("data/"+training_data)
+    train_df1 = train_df1.drop(["Op1", "Op2", "Op3","Sensor5","Sensor6","Sensor10","Sensor16","Sensor18","Sensor19"], axis=1)
     Y = train_df1["CyclesToFailure"]
     X = train_df1.drop("CyclesToFailure", axis=1)
     model_lin = sm.OLS(Y,X)
@@ -49,6 +50,7 @@ def prediction_test(test_data_file, model):
     "Sensor21"
     ]
     test_data = pd.read_csv("data/"+test_data_file, sep='\s+',header=None, names=column_names)
+    test_data = test_data.drop(["Op1", "Op2", "Op3","Sensor5","Sensor6","Sensor10","Sensor16","Sensor18","Sensor19"], axis=1)
     model_save = open(model, "rb")
     model_lin_fit = load(model_save)
     rul_est = model_lin_fit.predict(test_data)
@@ -95,6 +97,7 @@ def get_single_prediction(test_data_file, model):
     else:
         test_data = pd.read_csv(test_data_file, sep='\s+',header=None, names=column_names)
         model_save = open("models/"+model, "rb")
+    test_data = test_data.drop(["Op1", "Op2", "Op3","Sensor5","Sensor6","Sensor10","Sensor16","Sensor18","Sensor19"], axis=1)
     model_lin_fit = load(model_save)
     rul_est = model_lin_fit.predict(test_data)
     test_data["RULPrediction"] = rul_est
