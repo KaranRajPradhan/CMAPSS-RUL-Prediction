@@ -4,6 +4,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import xgboost as xgb
 import os
+from pickle import dump, load
+
 
 base_path = "CMAPSSData/"
 train_files = ["train_FD001.txt", "train_FD002.txt", "train_FD003.txt", "train_FD004.txt"]
@@ -88,6 +90,8 @@ def train_xgb_model(X_train, y_train):
         tree_method="hist"
     )
     xgb_model.fit(X_train, y_train)
+    model_save = open("model_xgboost", "wb")
+    dump(xgb_model, model_save, protocol=5)
     return xgb_model
 
 def test_xgb_model(model, X_test, y_test):
@@ -112,7 +116,29 @@ def test_xgb_model(model, X_test, y_test):
 
     return mae, rmse, r2, results
 
-X_train, y_train = load_train_data(train_files)
-X_test, y_test = load_test_data(test_files, rul_files)
-model = train_xgb_model(X_train, y_train)
-mae, rmse, r2, results = test_xgb_model(model, X_test, y_test)
+def get_single_prediction(test_data_file):
+    column_names = [
+        "EngineID", "Cycle", "Op1", "Op2", "Op3",
+        "Sensor1", "Sensor2", "Sensor3", "Sensor4", "Sensor5",
+        "Sensor6", "Sensor7", "Sensor8", "Sensor9", "Sensor10",
+        "Sensor11", "Sensor12", "Sensor13", "Sensor14", "Sensor15",
+        "Sensor16", "Sensor17", "Sensor18", "Sensor19", "Sensor20",
+        "Sensor21"
+        ]
+    if type(test_data_file) == str:
+        test_data = pd.read_csv("data/"+test_data_file, sep='\s+',header=None, names=column_names)
+        model_save = open("model_xgboost", "rb")
+    else:
+        test_data = pd.read_csv(test_data_file, sep='\s+',header=None, names=column_names)
+        model_save = open("models/model_xgboost", "rb")
+    test_data = test_data.drop(["EngineID", "Cycle", "Sensor14", "Sensor11"], axis=1)
+    model = load(model_save)
+    rul_est = model.predict(test_data)
+    test_data["RULPrediction"] = rul_est
+    return(int(rul_est[0]))
+
+def test_model():
+    X_train, y_train = load_train_data(train_files)
+    X_test, y_test = load_test_data(test_files, rul_files)
+    model = train_xgb_model(X_train, y_train)
+    mae, rmse, r2, results = test_xgb_model(model, X_test, y_test)

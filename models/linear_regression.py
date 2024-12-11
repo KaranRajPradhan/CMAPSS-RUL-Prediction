@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from time import time
 from pickle import dump, load
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 
 def prepare_csv(filename):    
     column_names = [
@@ -25,7 +26,6 @@ def prepare_csv(filename):
     
 def generate_model(training_data, model_name):
     train_df1 = pd.read_csv("data/"+training_data)
-    
     Y = train_df1["CyclesToFailure"]
     X = train_df1.drop("CyclesToFailure", axis=1)
     model_lin = sm.OLS(Y,X)
@@ -49,19 +49,36 @@ def prediction_test(test_data_file, model):
     "Sensor21"
     ]
     test_data = pd.read_csv("data/"+test_data_file, sep='\s+',header=None, names=column_names)
-    print(test_data.head())
     model_save = open(model, "rb")
     model_lin_fit = load(model_save)
     rul_est = model_lin_fit.predict(test_data)
     test_data["RULPrediction"] = rul_est
+    test_data["RULPrediction"] = test_data["RULPrediction"].astype(int)
     failure_data = test_data.loc[test_data.groupby('EngineID')['Cycle'].idxmax()]
     test_data["CyclesToFailure"] = test_data.apply(lambda row: failure_data["Cycle"].loc[failure_data["EngineID"] == row.EngineID].values[0]-row.Cycle, axis=1)
+    test_data = test_data[test_data["CyclesToFailure"] > 0]
     test_data["Error"] = test_data["CyclesToFailure"].sub(test_data["RULPrediction"])
     test_data["PercentError"] = test_data["Error"].div(test_data["CyclesToFailure"])
-    RMSE = np.square(test_data["Error"].pow(1/2).mean())
-    RMSPE = np.square(test_data["PercentError"].pow(1/2).mean())
-    print(test_data.head())
-    print(RMSE,RMSPE)
+    MAE = mean_absolute_error(test_data["CyclesToFailure"], test_data["RULPrediction"])
+    MAPE = mean_absolute_percentage_error(test_data["CyclesToFailure"], test_data["RULPrediction"])
+    print(MAE,MAPE)
+    return (MAE,MAPE)
+    
+def test_models():
+    models = ["model_lin_fit_01.pkl","model_lin_fit_02.pkl","model_lin_fit_03.pkl","model_lin_fit_04.pkl"]
+    test_datasets = ["test_FD001.txt","test_FD002.txt","test_FD003.txt","test_FD004.txt"]
+    results = []
+    for i in models:
+        for j in test_datasets:
+            results = results + [(prediction_test(j, i))]
+    avg_MAE = 0
+    avg_MAPE = 0
+    for i in results:
+        avg_MAE = avg_MAE + i[0]
+        avg_MAPE = avg_MAPE + i[1]
+    avg_MAE = avg_MAE / len(results)
+    avg_MAPE = avg_MAPE / len(results)
+    return(avg_MAE, avg_MAPE)
     
 def get_single_prediction(test_data_file, model):
     column_names = [
