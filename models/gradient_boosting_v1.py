@@ -8,13 +8,13 @@ from pickle import dump, load
 
 
 base_path = "CMAPSSData/"
-# train_files = ["train_FD001.txt", "train_FD002.txt", "train_FD003.txt", "train_FD004.txt"]
-# test_files = ["test_FD001.txt", "test_FD002.txt", "test_FD003.txt", "test_FD004.txt"]
-# rul_files = ["RUL_FD001.txt", "RUL_FD002.txt", "RUL_FD003.txt", "RUL_FD004.txt"]
+train_files = ["train_FD001.txt", "train_FD002.txt", "train_FD003.txt", "train_FD004.txt"]
+test_files = ["test_FD001.txt", "test_FD002.txt", "test_FD003.txt", "test_FD004.txt"]
+rul_files = ["RUL_FD001.txt", "RUL_FD002.txt", "RUL_FD003.txt", "RUL_FD004.txt"]
 
-train_files = ["train_FD001.txt"]
-test_files = ["test_FD001.txt"]
-rul_files = ["RUL_FD001.txt"]
+# train_files = ["train_FD001.txt"]
+# test_files = ["test_FD001.txt"]
+# rul_files = ["RUL_FD001.txt"]
 
 columns = [
         "EngineID", "Cycle", "Op1", "Op2", "Op3",
@@ -137,8 +137,8 @@ def get_single_prediction(test_data_file):
     test_data["RULPrediction"] = rul_est
     return(int(rul_est[0]))
 
-# def test_model():
-X_train, y_train = load_train_data(train_files)
-X_test, y_test = load_test_data(test_files, rul_files)
-model = train_xgb_model(X_train, y_train)
-mae, rmse, r2, results = test_xgb_model(model, X_test, y_test)
+def test_model():
+    X_train, y_train = load_train_data(train_files)
+    X_test, y_test = load_test_data(test_files, rul_files)
+    model = train_xgb_model(X_train, y_train)
+    mae, rmse, r2, results = test_xgb_model(model, X_test, y_test)
