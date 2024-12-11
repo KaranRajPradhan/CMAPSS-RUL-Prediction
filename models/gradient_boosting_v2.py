@@ -65,8 +65,10 @@ def load_test_data(test_files, rul_files):
     scaler = MinMaxScaler()
     test_data[selected_features] = scaler.fit_transform(test_data[selected_features])
 
-    # Assign RUL to all rows in test data based on EngineID
-    test_data["RUL"] = test_data["EngineID"].apply(lambda engine_id: rul_data.iloc[engine_id - 1, 0])
+    # Assign RUL dynamically based on EngineID and Cycle
+    max_cycles = test_data.groupby("EngineID")["Cycle"].transform("max")
+    total_cycles = test_data["EngineID"].map(lambda engine_id: rul_data.iloc[engine_id - 1, 0])
+    test_data["RUL"] = total_cycles + max_cycles - test_data["Cycle"]
 
     X_test = test_data[selected_features]
     y_test = test_data["RUL"]
