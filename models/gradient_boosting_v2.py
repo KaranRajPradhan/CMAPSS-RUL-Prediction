@@ -61,7 +61,7 @@ def load_test_data(test_files, rul_files):
 
     rul_data = pd.concat(rul_data_list, axis=0).reset_index(drop=True)
 
-    # Normalize sensor data using the scaler fitted on train data
+    # Normalize sensor data
     scaler = MinMaxScaler()
     test_data[selected_features] = scaler.fit_transform(test_data[selected_features])
 
@@ -72,8 +72,9 @@ def load_test_data(test_files, rul_files):
 
     X_test = test_data[selected_features]
     y_test = test_data["RUL"]
+    engine_ids = test_data["EngineID"]
 
-    return X_test, y_test
+    return X_test, y_test, engine_ids
 
 def train_xgb_model(X_train, y_train):
     xgb_model = xgb.XGBRegressor(
@@ -88,11 +89,12 @@ def train_xgb_model(X_train, y_train):
     dump(xgb_model, model_save, protocol=5)
     return xgb_model
 
-def test_xgb_model(model, X_test, y_test):
+def test_xgb_model(model, X_test, y_test, engine_ids):
     y_pred = model.predict(X_test)
 
-    # Create a new DataFrame with Actual RUL and Predicted RUL
+    # Create a new DataFrame with EngineID, Actual RUL, and Predicted RUL
     results = pd.DataFrame({
+        "EngineID": engine_ids.values,
         "Actual_RUL": y_test.values,
         "Predicted_RUL": y_pred
     })
@@ -125,6 +127,6 @@ def get_single_prediction(test_data_file):
     return int(rul_est[0])
 
 X_train, y_train = load_train_data(train_files)
-X_test, y_test = load_test_data(test_files, rul_files)
+X_test, y_test, engine_ids = load_test_data(test_files, rul_files)
 model = train_xgb_model(X_train, y_train)
-mae, rmse, r2, results = test_xgb_model(model, X_test, y_test)
+mae, rmse, r2, results = test_xgb_model(model, X_test, y_test, engine_ids)
